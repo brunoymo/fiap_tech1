@@ -12,7 +12,8 @@ router = APIRouter(prefix="/producao", tags=["Produção"])
 
 # Inicializa o downloader de CSV
 data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
-csv_downloader = CSVDownloader(data_dir)
+# Instanciar o CSVDownloader com o diretório /tmp
+csv_downloader = CSVDownloader(data_dir="/tmp")
 
 class ProducaoTipo(str, Enum):
     producao = "producao"

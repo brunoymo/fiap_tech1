@@ -9,8 +9,7 @@ import os
 router = APIRouter(prefix="/subcategorias", tags=["Subcategorias"])
 
 # Inicializa o downloader de CSV
-data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
-csv_downloader = CSVDownloader(data_dir)
+csv_downloader = CSVDownloader(data_dir="/tmp")
 
 @router.get("/{categoria}")
 async def get_subcategorias(categoria: str) -> Dict[str, Any]:
