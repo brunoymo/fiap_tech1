@@ -24,26 +24,23 @@ class ProcessamentoTipo(str, Enum):
 logger = logging.getLogger(__name__)
 
 @router.get("/{tipo}")
-async def get_processamento_tipo(
-    tipo: ProcessamentoTipo = Path(..., description="Tipo de processamento. Valores válidos: viniferas, americanas, mesa"),
+async def get_tipo(
+    tipo: str = Path(..., description="Tipo de dado. Valores válidos: viniferas, americanas, mesa"),
     filtros: Dict[str, Any] = Depends(parse_filters)
 ) -> Dict[str, Any]:
     """
-    Retorna dados de processamento de acordo com o tipo especificado.
+    Retorna dados de acordo com o tipo especificado.
     """
-    tipos_validos = [
-        "viniferas", "americanas", "mesa"
-    ]
+    tipos_validos = ["viniferas", "americanas", "mesa"]
     chave = f"processamento_{tipo}"
     if tipo not in tipos_validos:
-        raise HTTPException(status_code=400, detail="Tipo de processamento inválido. Tipos válidos: viniferas, americanas, mesa.")
+        raise HTTPException(status_code=400, detail="Tipo inválido. Tipos válidos: viniferas, americanas, mesa.")
     logger.info(f"Recebendo requisição para tipo: {tipo}")
     try:
         dados = csv_downloader.get_data(chave)
         if not dados:
             logger.error("Dados não encontrados.")
-            raise HTTPException(status_code=500, detail="Não foi possível obter dados de processamento.")
-        # Aplica filtros se fornecidos
+            raise HTTPException(status_code=500, detail="Não foi possível obter dados.")
         if filtros:
             dados_filtrados = []
             for item in dados["data"]:
@@ -58,21 +55,4 @@ async def get_processamento_tipo(
         return dados
     except Exception as e:
         logger.error(f"Erro ao processar dados: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Erro ao processar dados de processamento: {str(e)}")
-
-@router.get("/{categoria}")
-async def get_processamento_categoria(categoria: str):
-    """
-    Retorna dados de processamento para a categoria especificada.
-    """
-    try:
-        if categoria not in ["processamento_viniferas", "processamento_americanas", "processamento_mesa"]:
-            raise HTTPException(status_code=400, detail="Categoria inválida para processamento.")
-
-        dados = csv_downloader.get_data(categoria)
-        if not dados:
-            raise HTTPException(status_code=500, detail="Não foi possível obter dados de processamento.")
-
-        return dados
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao processar dados de processamento: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao processar dados: {str(e)}")

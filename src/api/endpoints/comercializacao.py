@@ -22,26 +22,23 @@ class ComercializacaoTipo(str, Enum):
 logger = logging.getLogger(__name__)
 
 @router.get("/{tipo}")
-async def get_comercializacao_tipo(
-    tipo: ComercializacaoTipo = Path(..., description="Tipo de comercialização. Valores válidos: comercializacao"),
+async def get_tipo(
+    tipo: str = Path(..., description="Tipo de dado. Valores válidos: viniferas, americanas, mesa"),
     filtros: Dict[str, Any] = Depends(parse_filters)
 ) -> Dict[str, Any]:
     """
-    Retorna dados de comercialização de acordo com o tipo especificado.
+    Retorna dados de acordo com o tipo especificado.
     """
-    logger.info(f"Recebendo requisição para tipo: {tipo}")
-    tipos_validos = [
-        "comercializacao"
-    ]
-    chave = f"{tipo}"
+    tipos_validos = ["viniferas", "americanas", "mesa"]
+    chave = f"comercializacao_{tipo}"
     if tipo not in tipos_validos:
-        raise HTTPException(status_code=400, detail="Tipo de comercialização inválido. Tipos válidos: comercializacao.")
+        raise HTTPException(status_code=400, detail="Tipo inválido. Tipos válidos: viniferas, americanas, mesa.")
+    logger.info(f"Recebendo requisição para tipo: {tipo}")
     try:
         dados = csv_downloader.get_data(chave)
         if not dados:
             logger.error("Dados não encontrados.")
-            raise HTTPException(status_code=500, detail="Não foi possível obter dados de comercialização.")
-        # Aplica filtros se fornecidos
+            raise HTTPException(status_code=500, detail="Não foi possível obter dados.")
         if filtros:
             dados_filtrados = []
             for item in dados["data"]:
@@ -56,21 +53,4 @@ async def get_comercializacao_tipo(
         return dados
     except Exception as e:
         logger.error(f"Erro ao processar dados: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Erro ao processar dados de comercialização: {str(e)}")
-
-@router.get("/{categoria}")
-async def get_comercializacao_categoria(categoria: str):
-    """
-    Retorna dados de comercialização para a categoria especificada.
-    """
-    try:
-        if categoria not in ["comercializacao"]:
-            raise HTTPException(status_code=400, detail="Categoria inválida para comercialização.")
-
-        dados = csv_downloader.get_data(categoria)
-        if not dados:
-            raise HTTPException(status_code=500, detail="Não foi possível obter dados de comercialização.")
-
-        return dados
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao processar dados de comercialização: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao processar dados: {str(e)}")
