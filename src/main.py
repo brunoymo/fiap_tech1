@@ -50,6 +50,20 @@ async def root():
         ]
     }
 
+# Endpoint de teste para verificar o download de arquivos CSV no ambiente do Vercel
+@app.get("/test-download", tags=["test"])
+async def test_download():
+    """
+    Endpoint de teste para verificar o download de arquivos CSV no ambiente do Vercel.
+    """
+    try:
+        from src.utils.csv_downloader import CSVDownloader
+        downloader = CSVDownloader(data_dir="/tmp")
+        result = downloader.download_csv("producao")
+        return {"status": "success", "file": result}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 # Personalização da documentação OpenAPI
 def custom_openapi():
     if app.openapi_schema:
