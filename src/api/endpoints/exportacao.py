@@ -26,16 +26,16 @@ logger = logging.getLogger(__name__)
 
 @router.get("/{tipo}")
 async def get_tipo(
-    tipo: str = Path(..., description="Tipo de dado. Valores válidos: viniferas, americanas, mesa"),
+    tipo: str = Path(..., description="Tipo de dado. Valores válidos: vinho, espumante, frescas, suco"),
     filtros: Dict[str, Any] = Depends(parse_filters)
 ) -> Dict[str, Any]:
     """
     Retorna dados de acordo com o tipo especificado.
     """
-    tipos_validos = ["viniferas", "americanas", "mesa"]
+    tipos_validos = ["vinho", "espumante", "frescas", "suco"]
     chave = f"exportacao_{tipo}"
     if tipo not in tipos_validos:
-        raise HTTPException(status_code=400, detail="Tipo inválido. Tipos válidos: viniferas, americanas, mesa.")
+        raise HTTPException(status_code=400, detail="Tipo inválido. Tipos válidos: vinho, espumante, frescas, suco.")
     logger.info(f"Recebendo requisição para tipo: {tipo}")
     try:
         dados = csv_downloader.get_data(chave)
