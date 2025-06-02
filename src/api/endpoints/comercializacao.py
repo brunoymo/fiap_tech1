@@ -7,6 +7,7 @@ from src.utils.csv_downloader import CSVDownloader
 from src.utils.filter_parser import parse_filters
 import os
 from enum import Enum
+import logging
 
 router = APIRouter(prefix="/comercializacao", tags=["Comercialização"])
 
@@ -18,6 +19,8 @@ csv_downloader = CSVDownloader(data_dir="/tmp")
 class ComercializacaoTipo(str, Enum):
     comercializacao = "comercializacao"
 
+logger = logging.getLogger(__name__)
+
 @router.get("/{tipo}")
 async def get_comercializacao_tipo(
     tipo: ComercializacaoTipo = Path(..., description="Tipo de comercialização. Valores válidos: comercializacao"),
@@ -26,6 +29,7 @@ async def get_comercializacao_tipo(
     """
     Retorna dados de comercialização de acordo com o tipo especificado.
     """
+    logger.info(f"Recebendo requisição para tipo: {tipo}")
     tipos_validos = [
         "comercializacao"
     ]
@@ -35,6 +39,7 @@ async def get_comercializacao_tipo(
     try:
         dados = csv_downloader.get_data(chave)
         if not dados:
+            logger.error("Dados não encontrados.")
             raise HTTPException(status_code=500, detail="Não foi possível obter dados de comercialização.")
         # Aplica filtros se fornecidos
         if filtros:
@@ -50,4 +55,5 @@ async def get_comercializacao_tipo(
             dados["data"] = dados_filtrados
         return dados
     except Exception as e:
+        logger.error(f"Erro ao processar dados: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao processar dados de comercialização: {str(e)}")

@@ -7,6 +7,7 @@ from src.utils.csv_downloader import CSVDownloader
 from src.utils.filter_parser import parse_filters
 import os
 from enum import Enum
+import logging
 
 router = APIRouter(prefix="/processamento", tags=["Processamento"])
 
@@ -19,6 +20,8 @@ class ProcessamentoTipo(str, Enum):
     viniferas = "viniferas"
     americanas = "americanas"
     mesa = "mesa"
+
+logger = logging.getLogger(__name__)
 
 @router.get("/{tipo}")
 async def get_processamento_tipo(
@@ -34,9 +37,11 @@ async def get_processamento_tipo(
     chave = f"processamento_{tipo}"
     if tipo not in tipos_validos:
         raise HTTPException(status_code=400, detail="Tipo de processamento inválido. Tipos válidos: viniferas, americanas, mesa.")
+    logger.info(f"Recebendo requisição para tipo: {tipo}")
     try:
         dados = csv_downloader.get_data(chave)
         if not dados:
+            logger.error("Dados não encontrados.")
             raise HTTPException(status_code=500, detail="Não foi possível obter dados de processamento.")
         # Aplica filtros se fornecidos
         if filtros:
@@ -52,4 +57,5 @@ async def get_processamento_tipo(
             dados["data"] = dados_filtrados
         return dados
     except Exception as e:
+        logger.error(f"Erro ao processar dados: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao processar dados de processamento: {str(e)}")

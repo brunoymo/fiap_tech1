@@ -7,6 +7,7 @@ from src.utils.csv_downloader import CSVDownloader
 from src.utils.filter_parser import parse_filters
 import os
 from enum import Enum
+import logging
 
 router = APIRouter(prefix="/exportacao", tags=["Exportação"])
 
@@ -20,6 +21,8 @@ class ExportacaoTipo(str, Enum):
     espumante = "espumante"
     frescas = "frescas"
     suco = "suco"
+
+logger = logging.getLogger(__name__)
 
 @router.get("/{tipo}")
 async def get_exportacao_tipo(
@@ -35,9 +38,11 @@ async def get_exportacao_tipo(
     chave = f"exportacao_{tipo}"
     if tipo not in tipos_validos:
         raise HTTPException(status_code=400, detail="Tipo de exportação inválido. Tipos válidos: vinho, espumante, frescas, suco.")
+    logger.info(f"Recebendo requisição para tipo: {tipo}")
     try:
         dados = csv_downloader.get_data(chave)
         if not dados:
+            logger.error("Dados não encontrados.")
             raise HTTPException(status_code=500, detail="Não foi possível obter dados de exportação.")
         # Aplica filtros se fornecidos
         if filtros:
@@ -53,4 +58,5 @@ async def get_exportacao_tipo(
             dados["data"] = dados_filtrados
         return dados
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao processar dados de exportação: {str(e)}")
+        logger.error(f"Erro ao processar dados: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao processar dados: {str(e)}")
