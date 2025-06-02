@@ -57,3 +57,20 @@ async def get_comercializacao_tipo(
     except Exception as e:
         logger.error(f"Erro ao processar dados: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao processar dados de comercialização: {str(e)}")
+
+@router.get("/{categoria}")
+async def get_comercializacao_categoria(categoria: str):
+    """
+    Retorna dados de comercialização para a categoria especificada.
+    """
+    try:
+        if categoria not in ["comercializacao"]:
+            raise HTTPException(status_code=400, detail="Categoria inválida para comercialização.")
+
+        dados = csv_downloader.get_data(categoria)
+        if not dados:
+            raise HTTPException(status_code=500, detail="Não foi possível obter dados de comercialização.")
+
+        return dados
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao processar dados de comercialização: {str(e)}")

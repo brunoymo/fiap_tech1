@@ -61,3 +61,20 @@ async def get_importacao_tipo(
     except Exception as e:
         logger.error(f"Erro ao processar dados: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao processar dados de importação: {str(e)}")
+
+@router.get("/{categoria}")
+async def get_importacao_categoria(categoria: str):
+    """
+    Retorna dados de importação para a categoria especificada.
+    """
+    try:
+        if categoria not in ["importacao_vinho", "importacao_espumante", "importacao_frescas", "importacao_passas", "importacao_suco"]:
+            raise HTTPException(status_code=400, detail="Categoria inválida para importação.")
+
+        dados = csv_downloader.get_data(categoria)
+        if not dados:
+            raise HTTPException(status_code=500, detail="Não foi possível obter dados de importação.")
+
+        return dados
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao processar dados de importação: {str(e)}")

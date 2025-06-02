@@ -59,3 +59,20 @@ async def get_processamento_tipo(
     except Exception as e:
         logger.error(f"Erro ao processar dados: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao processar dados de processamento: {str(e)}")
+
+@router.get("/{categoria}")
+async def get_processamento_categoria(categoria: str):
+    """
+    Retorna dados de processamento para a categoria especificada.
+    """
+    try:
+        if categoria not in ["processamento_viniferas", "processamento_americanas", "processamento_mesa"]:
+            raise HTTPException(status_code=400, detail="Categoria inválida para processamento.")
+
+        dados = csv_downloader.get_data(categoria)
+        if not dados:
+            raise HTTPException(status_code=500, detail="Não foi possível obter dados de processamento.")
+
+        return dados
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao processar dados de processamento: {str(e)}")

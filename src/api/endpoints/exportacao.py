@@ -60,3 +60,20 @@ async def get_exportacao_tipo(
     except Exception as e:
         logger.error(f"Erro ao processar dados: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao processar dados: {str(e)}")
+
+@router.get("/{categoria}")
+async def get_exportacao_categoria(categoria: str):
+    """
+    Retorna dados de exportação para a categoria especificada.
+    """
+    try:
+        if categoria not in ["exportacao_vinho", "exportacao_espumante", "exportacao_frescas", "exportacao_suco"]:
+            raise HTTPException(status_code=400, detail="Categoria inválida para exportação.")
+
+        dados = csv_downloader.get_data(categoria)
+        if not dados:
+            raise HTTPException(status_code=500, detail="Não foi possível obter dados de exportação.")
+
+        return dados
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao processar dados de exportação: {str(e)}")

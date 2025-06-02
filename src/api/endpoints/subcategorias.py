@@ -14,44 +14,21 @@ csv_downloader = CSVDownloader(data_dir="/tmp")
 logger = logging.getLogger(__name__)
 
 @router.get("/{categoria}")
-async def get_subcategorias(categoria: str) -> Dict[str, Any]:
+async def get_subcategorias_categoria(categoria: str):
     """
-    Retorna as subcategorias disponíveis para filtragem na categoria especificada.
-    
-    Args:
-        categoria: Nome da categoria (producao, processamento, comercializacao, importacao, exportacao)
+    Retorna dados de subcategorias para a categoria especificada.
     """
-    categorias_validas = ["producao", "processamento", "comercializacao", "importacao", "exportacao"]
-    
-    if categoria not in categorias_validas:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Categoria inválida. Categorias válidas: {', '.join(categorias_validas)}"
-        )
-    
-    logger.info(f"Recebendo requisição para categoria: {categoria}")
     try:
+        if categoria not in csv_downloader.DOWNLOAD_URLS.keys():
+            raise HTTPException(status_code=400, detail="Categoria inválida para subcategorias.")
+
         dados = csv_downloader.get_data(categoria)
-        
         if not dados:
-            logger.error(f"Dados não encontrados para a categoria: {categoria}")
-            raise HTTPException(
-                status_code=500, 
-                detail=f"Não foi possível obter subcategorias de {categoria}. Tente novamente mais tarde."
-            )
-        
-        logger.info(f"Dados obtidos com sucesso para a categoria: {categoria}")
-        return {
-            "categoria": categoria,
-            "subcategorias": dados["subcategorias"]
-        }
-    
+            raise HTTPException(status_code=500, detail="Não foi possível obter dados de subcategorias.")
+
+        return dados
     except Exception as e:
-        logger.error(f"Erro ao obter subcategorias de {categoria}: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Erro ao obter subcategorias de {categoria}: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Erro ao processar dados de subcategorias: {str(e)}")
 
 @router.get("/{tipo}")
 async def get_subcategorias_tipo(tipo: str):
