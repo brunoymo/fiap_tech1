@@ -40,7 +40,7 @@ class CSVDownloader:
         "exportacao_suco": "http://vitibrasil.cnpuv.embrapa.br/download/ExpSuco.csv"
     }
     
-    def __init__(self, data_dir: str):
+    def __init__(self, data_dir: str = "/tmp"):
         """
         Inicializa o downloader de CSV.
         
