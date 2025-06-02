@@ -1,12 +1,11 @@
 """
 Endpoint para dados de comercialização.
 """
-from fastapi import APIRouter, Depends, Query, HTTPException, Path
-from typing import Dict, Any, Optional
+from fastapi import APIRouter, Depends, HTTPException
+from typing import Dict, Any
 from src.utils.csv_downloader import CSVDownloader
 from src.utils.filter_parser import parse_filters
 import os
-from enum import Enum
 import logging
 
 router = APIRouter(prefix="/comercializacao", tags=["Comercialização"])
@@ -16,24 +15,17 @@ data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__
 # Instanciar o CSVDownloader com o diretório /tmp
 csv_downloader = CSVDownloader(data_dir="/tmp")
 
-class ComercializacaoTipo(str, Enum):
-    comercializacao = "comercializacao"
-
 logger = logging.getLogger(__name__)
 
-@router.get("/{tipo}")
-async def get_tipo(
-    tipo: str = Path(..., description="Tipo de dado. Valores válidos: viniferas, americanas, mesa"),
+@router.get("/")
+async def get_comercializacao(
     filtros: Dict[str, Any] = Depends(parse_filters)
 ) -> Dict[str, Any]:
     """
-    Retorna dados de acordo com o tipo especificado.
+    Retorna dados de comercialização sem tipos específicos.
     """
-    tipos_validos = ["viniferas", "americanas", "mesa"]
-    chave = f"comercializacao_{tipo}"
-    if tipo not in tipos_validos:
-        raise HTTPException(status_code=400, detail="Tipo inválido. Tipos válidos: viniferas, americanas, mesa.")
-    logger.info(f"Recebendo requisição para tipo: {tipo}")
+    chave = "comercializacao"
+    logger.info("Recebendo requisição para comercialização")
     try:
         dados = csv_downloader.get_data(chave)
         if not dados:
